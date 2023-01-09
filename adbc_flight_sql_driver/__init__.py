@@ -1,7 +1,6 @@
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, cast
 
-#import duckdb
 import base64
 from pyarrow import flight_sql
 from adbc_driver_manager.dbapi import Connection as ADBCFlightSQLConnection, Cursor
@@ -14,7 +13,7 @@ from sqlalchemy.engine.url import URL
 
 from .datatypes import register_extension_types
 
-__version__ = "0.6.6"
+__version__ = "0.0.1"
 
 if TYPE_CHECKING:
     from sqlalchemy.base import Connection
@@ -193,18 +192,16 @@ class Dialect(PGDialect_psycopg2):
         raise NotImplementedError()
 
     def do_rollback(self, connection: "Connection") -> None:
-        try:
-            super().do_rollback(connection)
-        except DBAPI.TransactionException as e:
-            if (
-                e.args[0]
-                != "TransactionContext Error: cannot rollback - no transaction is active"
-            ):
-                raise e
+        with connection.cursor() as cur:
+            cur.execute("rollback")
 
     def do_begin(self, connection: "Connection") -> None:
         with connection.cursor() as cur:
             cur.execute("begin")
+
+    def do_commit(self, connection: "Connection") -> None:
+        with connection.cursor() as cur:
+            cur.execute("commit")
 
     def get_view_names(
         self,
