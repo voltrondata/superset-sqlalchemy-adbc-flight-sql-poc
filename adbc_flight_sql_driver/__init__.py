@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from sqlalchemy.base import Connection
     from sqlalchemy.engine.interfaces import _IndexDict
 
-
 register_extension_types()
 
 
@@ -40,7 +39,7 @@ class DBAPI:
 
 class FlightSQLInspector(PGInspector):
     def get_check_constraints(
-        self, table_name: str, schema: Optional[str] = None, **kw: Any
+            self, table_name: str, schema: Optional[str] = None, **kw: Any
     ) -> List[Dict[str, Any]]:
         try:
             return super().get_check_constraints(table_name, schema, **kw)
@@ -87,18 +86,18 @@ class ConnectionWrapper:
         return self.cursor().rowcount
 
     def executemany(
-        self,
-        statement: str,
-        parameters: Optional[List[Dict]] = None,
-        context: Optional[Any] = None,
+            self,
+            statement: str,
+            parameters: Optional[List[Dict]] = None,
+            context: Optional[Any] = None,
     ) -> None:
         self.cursor().executemany(statement, parameters)
 
     def execute(
-        self,
-        statement: str,
-        parameters: Optional[Tuple] = None,
-        context: Optional[Any] = None,
+            self,
+            statement: str,
+            parameters: Optional[Tuple] = None,
+            context: Optional[Any] = None,
     ) -> None:
         try:
             if statement.lower() == "commit":  # this is largely for ipython-sql
@@ -114,8 +113,8 @@ class ConnectionWrapper:
             if e.args[0].startswith("Not implemented Error"):
                 raise NotImplementedError(*e.args) from e
             elif (
-                e.args[0]
-                == "TransactionContext Error: cannot commit - no transaction is active"
+                    e.args[0]
+                    == "TransactionContext Error: cannot commit - no transaction is active"
             ):
                 return
             else:
@@ -204,24 +203,24 @@ class Dialect(PGDialect_psycopg2):
             cur.execute("commit")
 
     def get_view_names(
-        self,
-        connection: Any,
-        schema: Optional[Any] = None,
-        include: Optional[Any] = None,
-        **kw: Any,
+            self,
+            connection: Any,
+            schema: Optional[Any] = None,
+            include: Optional[Any] = None,
+            **kw: Any,
     ) -> Any:
-        s = "SELECT table_name FROM information_schema.tables WHERE table_type='VIEW' and table_schema=?"
+        s = "SELECT table_name FROM information_schema.tables WHERE table_type='VIEW' AND table_schema=?"
         with connection.cursor() as cur:
             rs = cur.execute(s, schema if schema is not None else "main")
 
         return [row[0] for row in rs]
 
     def get_indexes(
-        self,
-        connection: "Connection",
-        table_name: str,
-        schema: Optional[str] = None,
-        **kw: Any,
+            self,
+            connection: "Connection",
+            table_name: str,
+            schema: Optional[str] = None,
+            **kw: Any,
     ) -> List["_IndexDict"]:
         warnings.warn(
             "duckdb-engine doesn't yet support reflection on indices",
