@@ -152,14 +152,21 @@ class Dialect(PGDialect_psycopg2):
         super().__init__(*args, **kwargs)
 
     def connect(self, *cargs: Any, **cparams: Any) -> ADBCFlightSQLConnection:
-        uri = f"{cparams.get('protocol')}://{cparams.get('host')}:{cparams.get('port')}"
+        protocol: str = "grpc"
+        use_encryption: bool = cparams.get("useEncryption", "False").lower() == "true"
+        if use_encryption:
+            protocol += "+tls"
+
+        disable_certificate_verification: bool = cparams.get("disableCertificateVerification", "False").lower() == "true"
+
+        uri = f"{protocol}://{cparams.get('host')}:{cparams.get('port')}"
         user = cparams.get('user')
         password = cparams.get('password')
         authorization_header = f"Basic {str(base64.b64encode(bytes(f'{user}:{password}', encoding='utf-8')), encoding='utf-8')}"
 
         conn = flight_sql.connect(uri=uri,
                                   db_kwargs={"arrow.flight.sql.authorization_header": authorization_header,
-                                             "arrow.flight.sql.client_option.disable_server_verification": "true"
+                                             "arrow.flight.sql.client_option.disable_server_verification": str(disable_certificate_verification).lower()
                                              }
                                   )
 
