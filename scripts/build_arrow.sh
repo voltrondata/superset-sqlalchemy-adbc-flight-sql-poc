@@ -17,8 +17,11 @@ fi
 # Track PR: https://github.com/apache/arrow/pull/14082 for details...
 ARROW_REPO=${1:-"https://github.com/lidavidm/arrow"} # https://github.com/apache/arrow.git
 ARROW_VERSION=${2:-"adbc-flight-sql"} # apache-arrow-10.0.1
+REMOVE_SOURCE_FILES=${3:-"N"}
+
 echo "Variable: ARROW_REPO=${ARROW_REPO}"
 echo "Variable: ARROW_VERSION=${ARROW_VERSION}"
+echo "Variable: REMOVE_SOURCE_FILES=${REMOVE_SOURCE_FILES}"
 
 SCRIPT_DIR=$(dirname ${0})
 ROOT_DIR=$(${READLINK_COMMAND} --canonicalize "${SCRIPT_DIR}/..")
@@ -33,6 +36,7 @@ git clone --depth 1 ${ARROW_REPO} --branch ${ARROW_VERSION}
 
 pushd arrow
 git submodule update --init
+export ARROW_TEST_DATA="${PWD}/testing/data"
 popd
 
 pip install -r arrow/python/requirements-build.txt
@@ -44,6 +48,7 @@ export LD_LIBRARY_PATH=${ARROW_HOME}/lib:$LD_LIBRARY_PATH
 # Add exports to the .bashrc for future sessions
 echo "export ARROW_HOME=${ARROW_HOME}" >> ~/.bashrc
 echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> ~/.bashrc
+echo "export ARROW_TEST_DATA=${ARROW_TEST_DATA}" >> ~/.bashrc
 
 #----------------------------------------------------------------------
 # Build C++ library
@@ -62,8 +67,8 @@ fi
 
 cmake -GNinja -DCMAKE_INSTALL_PREFIX=$ARROW_HOME \
         -DCMAKE_INSTALL_LIBDIR=lib \
-        -DCMAKE_BUILD_TYPE=Debug \
-        -DARROW_BUILD_TESTS=ON \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DARROW_BUILD_TESTS=OFF \
         -DARROW_COMPUTE=ON \
         -DARROW_CSV=ON \
         -DARROW_DATASET=ON \
@@ -81,7 +86,8 @@ cmake -GNinja -DCMAKE_INSTALL_PREFIX=$ARROW_HOME \
         -DARROW_WITH_ZLIB=ON \
         -DARROW_WITH_ZSTD=ON \
         -DPARQUET_REQUIRE_ENCRYPTION=ON \
-        -DGTest_SOURCE=BUNDLED
+        -DARROW_DEPENDENCY_SOURCE=AUTO \
+        -DARROW_BUILD_STATIC=ON
 
 ninja install
 popd
@@ -104,6 +110,18 @@ export PYARROW_WITH_FLIGHT=1
 export PYARROW_WITH_FLIGHT_SQL=1
 python setup.py develop
 popd
+
+# Do some more Mac stuff if needed...
+if [ "${OS}" == "Darwin" ]; then
+  echo "Running Mac-specific PyArrow steps..."
+  cp $ARROW_HOME/lib/*.* /usr/local/lib
+fi
+
+# Remove source files
+if [ "${REMOVE_SOURCE_FILES}" == "Y" ]; then
+  echo "Removing Arrow source files..."
+  rm -rf ./arrow
+fi
 
 popd
 
