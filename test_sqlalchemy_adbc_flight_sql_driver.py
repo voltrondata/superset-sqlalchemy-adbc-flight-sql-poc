@@ -6,7 +6,7 @@ database_url = URL.create(
     drivername="adbc_flight_sql",
     username="flight_username",
     password="flight_password",
-    host="localhost", # If running in a Docker container - use value: "host.docker.internal"
+    host="localhost",  # If running in a Docker container - use value: "host.docker.internal"
     port=31337,
     query=dict(useEncryption="True",
                disableCertificateVerification="True"
