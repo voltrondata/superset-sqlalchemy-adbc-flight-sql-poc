@@ -1,6 +1,7 @@
 import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, cast
 
+import re
 import base64
 from pyarrow import flight_sql
 from adbc_driver_manager.dbapi import Connection as ADBCFlightSQLConnection, Cursor
@@ -79,7 +80,7 @@ class ConnectionWrapper:
         return self
 
     def close(self) -> None:
-        ADBCFlightSQLConnection.close()
+        self.__c.close()
 
     @property
     def rowcount(self) -> int:
@@ -210,10 +211,57 @@ class Dialect(PGDialect_psycopg2):
             **kw: Any,
     ) -> Any:
         s = "SELECT table_name FROM information_schema.tables WHERE table_type='VIEW' AND table_schema=?"
-        with connection.cursor() as cur:
-            rs = cur.execute(s, schema if schema is not None else "main")
+        with connection.connection.cursor() as cur:
+            cur.execute(operation=s, parameters=[schema if schema is not None else "main"])
+            rs = cur.fetchall()
 
         return [row[0] for row in rs]
+
+    def get_check_constraints(self, connection, table_name, schema=None, **kw):
+        table_oid = self.get_table_oid(
+            connection, table_name, schema, info_cache=kw.get("info_cache")
+        )
+
+        CHECK_SQL = """
+            SELECT
+                cons.conname as name,
+                pg_get_constraintdef(cons.oid, true) as src
+            FROM
+                pg_catalog.pg_constraint cons
+            WHERE
+                cons.conrelid = ? AND
+                cons.contype = 'c'
+        """
+
+        with connection.connection.cursor() as cur:
+            cur.execute(operation=CHECK_SQL, parameters=[table_oid])
+            rs = cur.fetchall()
+
+        ret = []
+        for name, src in rs:
+            # samples:
+            # "CHECK (((a > 1) AND (a < 5)))"
+            # "CHECK (((a = 1) OR ((a > 2) AND (a < 5))))"
+            # "CHECK (((a > 1) AND (a < 5))) NOT VALID"
+            # "CHECK (some_boolean_function(a))"
+            # "CHECK (((a\n < 1)\n OR\n (a\n >= 5))\n)"
+
+            m = re.match(
+                r"^CHECK *\((.+)\)( NOT VALID)?$", src, flags=re.DOTALL
+            )
+            if not m:
+                util.warn("Could not parse CHECK constraint text: %r" % src)
+                sqltext = ""
+            else:
+                sqltext = re.compile(
+                    r"^[\s\n]*\((.+)\)[\s\n]*$", flags=re.DOTALL
+                ).sub(r"\1", m.group(1))
+            entry = {"name": name, "sqltext": sqltext}
+            if m and m.group(2):
+                entry["dialect_options"] = {"not_valid": True}
+
+            ret.append(entry)
+        return ret
 
     def get_indexes(
             self,

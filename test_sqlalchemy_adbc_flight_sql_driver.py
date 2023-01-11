@@ -13,6 +13,9 @@ database_url = URL.create(
                )
 )
 
+# Example url (for Docker)
+# adbc_flight_sql://flight_username:flight_password@host.docker.internal:31337?disableCertificateVerification=True&useEncryption=True
+
 print(f"database_url={database_url}")
 e = create_engine(url=database_url)
 
