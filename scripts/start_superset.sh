@@ -17,6 +17,8 @@
 #
 set -e
 
+source ~/.bashrc
+
 echo_step() {
 cat <<EOF
 

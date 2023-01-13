@@ -89,3 +89,7 @@ RUN npm install -f --no-optional webpack webpack-cli && \
 WORKDIR ${APP_DIR}/adbc
 
 EXPOSE 8088
+
+ENV LD_LIBRARY_PATH=/app/adbc/arrow_dist/lib
+
+ENTRYPOINT ["scripts/start_superset.sh"]
