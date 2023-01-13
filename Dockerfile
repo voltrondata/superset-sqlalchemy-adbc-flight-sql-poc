@@ -30,7 +30,7 @@ RUN apt-get update --yes && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install NodeJS
+# Install NodeJS (needed for Apache Superset)
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get install -y nodejs
 
@@ -47,7 +47,7 @@ USER app_user
 
 WORKDIR ${APP_DIR}
 
-# Setup a Virtual environment
+# Setup a Python Virtual environment
 ENV VIRTUAL_ENV=${APP_DIR}/venv
 RUN python3 -m venv ${VIRTUAL_ENV} && \
     echo ". ${VIRTUAL_ENV}/bin/activate" >> ~/.bashrc && \
@@ -82,9 +82,10 @@ ENV FLASK_APP="superset"
 WORKDIR ${APP_DIR}/adbc/apache-superset/superset-frontend
 RUN npm install -f --no-optional webpack webpack-cli && \
     npm install -f --no-optional && \
-    echo "Running frontend" && \
+    echo "Building frontend" && \
     npm run build-dev
 
+# Initialize superset
 WORKDIR ${APP_DIR}/adbc
 
 EXPOSE 8088
