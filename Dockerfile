@@ -62,22 +62,16 @@ COPY --chown=app_user:app_user . ./adbc
 
 WORKDIR ${APP_DIR}/adbc
 
-# Build Arrow/PyArrow
-RUN scripts/build_arrow.sh
-
-# Install ADBC Driver Manager
-RUN pip install adbc_driver_manager --index-url https://repo.fury.io/arrow-adbc-nightlies/ --extra-index-url https://pypi.org/simple/
+# Install Poetry package manager
+RUN pip install poetry
 
 # Install the local ADBC SQLAlchemy driver project
-RUN pip install .
+RUN poetry install
 
-# Install numpy version 1.23.5 as required by superset
-RUN pip install numpy==1.23.5
-
-# Install Apache Superset
+# Install Apache Superset (using source)
 RUN pip install --editable ./apache-superset
 
-ENV FLASK_APP="superset"
+ENV FLASK_APP="superset.app:create_app()"
 
 WORKDIR ${APP_DIR}/adbc/apache-superset/superset-frontend
 RUN npm install -f --no-optional webpack webpack-cli && \
@@ -89,7 +83,5 @@ RUN npm install -f --no-optional webpack webpack-cli && \
 WORKDIR ${APP_DIR}/adbc
 
 EXPOSE 8088
-
-ENV LD_LIBRARY_PATH=/app/adbc/arrow_dist/lib
 
 ENTRYPOINT ["scripts/start_superset.sh"]

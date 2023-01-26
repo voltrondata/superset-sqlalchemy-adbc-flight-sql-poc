@@ -2,9 +2,7 @@ import warnings
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Type, cast
 
 import re
-import base64
-from pyarrow import flight_sql
-from adbc_driver_manager.dbapi import Connection as ADBCFlightSQLConnection, Cursor
+import adbc_driver_flightsql.dbapi as flight_sql
 from sqlalchemy import pool
 from sqlalchemy import types as sqltypes
 from sqlalchemy import util
@@ -49,23 +47,23 @@ class FlightSQLInspector(PGInspector):
 
 
 class ConnectionWrapper:
-    __c: ADBCFlightSQLConnection
+    __c: "Connection"
     notices: List[str]
     autocommit = None  # duckdb doesn't support setting autocommit
     closed = False
 
-    def __init__(self, c: ADBCFlightSQLConnection) -> None:
+    def __init__(self, c: flight_sql.Connection) -> None:
         self.__c = c
         self.notices = list()
 
-    def cursor(self) -> Cursor:
+    def cursor(self) -> flight_sql.Cursor:
         return self.__c.cursor()
 
     def fetchmany(self, size: Optional[int] = None) -> List:
         return self.__c.fetchmany(size)
 
     @property
-    def c(self) -> ADBCFlightSQLConnection:
+    def c(self) -> "Connection":
         warnings.warn(
             "Directly accessing the internal connection object is deprecated (please go via the __getattr__ impl)",
             DeprecationWarning,
@@ -76,7 +74,7 @@ class ConnectionWrapper:
         return getattr(self.__c, name)
 
     @property
-    def connection(self) -> ADBCFlightSQLConnection:
+    def connection(self) -> "Connection":
         return self
 
     def close(self) -> None:
@@ -150,7 +148,7 @@ class Dialect(PGDialect_psycopg2):
         kwargs["use_native_hstore"] = False
         super().__init__(*args, **kwargs)
 
-    def connect(self, *cargs: Any, **cparams: Any) -> ADBCFlightSQLConnection:
+    def connect(self, *cargs: Any, **cparams: Any) -> "Connection":
         protocol: str = "grpc"
         use_encryption: bool = cparams.get("useEncryption", "False").lower() == "true"
         if use_encryption:
@@ -161,11 +159,11 @@ class Dialect(PGDialect_psycopg2):
         uri = f"{protocol}://{cparams.get('host')}:{cparams.get('port')}"
         user = cparams.get('user')
         password = cparams.get('password')
-        authorization_header = f"Basic {str(base64.b64encode(bytes(f'{user}:{password}', encoding='utf-8')), encoding='utf-8')}"
 
         conn = flight_sql.connect(uri=uri,
-                                  db_kwargs={"arrow.flight.sql.authorization_header": authorization_header,
-                                             "arrow.flight.sql.client_option.disable_server_verification": str(disable_certificate_verification).lower()
+                                  db_kwargs={"username": user,
+                                             "password": password,
+                                             "adbc.flight.sql.client_option.tls_skip_verify": str(disable_certificate_verification).lower()
                                              }
                                   )
 
