@@ -153,3 +153,15 @@ create_engine(
 ## The name
 
 Yes, I'm aware this package should be named `duckdb-driver` or something, I wasn't thinking when I named it and it's too hard to change the name now
+
+
+docker run --name larry \
+           --interactive \
+           --rm \
+           --tty \
+           --init \
+           --publish 8088:8088 \
+           --env SUPERSET_ADMIN_PASSWORD="admin" \
+           --pull missing \
+           --entrypoint /bin/bash \
+           joe
