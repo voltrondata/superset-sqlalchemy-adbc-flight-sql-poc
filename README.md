@@ -89,13 +89,13 @@ docker run --name superset-sqlalchemy-adbc-flight-sql \
 
 #### a. Click "Settings" in the upper-right, then under "Data" - click: "Database Connections"
 
-#### b. On the next screen - click: "+ DATABASE" - also in the upper-right, just under: "Settings
+#### b. On the next screen - click: "+ DATABASE" - also in the upper-right, just under: "Settings"
 
 #### c. When the "Connect a Database" window opens up - click the "SUPPORTED DATABASES" drop-down and choose: "Other"
 
 #### d. Type "Flight SQL" for "DISPLAY NAME"
 
-#### e. Enter the SQLALCHRMY URI value of:
+#### e. Enter the SQLALCHEMY URI value of:
 ```
 adbc_flight_sql://flight_username:flight_password@host.docker.internal:31337?disableCertificateVerification=True&useEncryption=True
 ```
