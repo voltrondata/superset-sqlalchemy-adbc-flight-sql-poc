@@ -1,167 +1,114 @@
-# duckdb_engine
+# Apache Superset using the new Python ADBC driver for Flight SQL 
 
-[![Supported Python Versions](https://img.shields.io/pypi/pyversions/duckdb-engine)](https://pypi.org/project/duckdb-engine/) [![PyPI version](https://badge.fury.io/py/duckdb-engine.svg)](https://badge.fury.io/py/duckdb-engine) [![PyPI Downloads](https://img.shields.io/pypi/dm/duckdb-engine.svg)](https://pypi.org/project/duckdb-engine/) [![codecov](https://codecov.io/gh/Mause/duckdb_engine/branch/master/graph/badge.svg)](https://codecov.io/gh/Mause/duckdb_engine)
+This repo demonstrates the use of the new Python ADBC Flight SQL driver with SQLAlchemy and Apache Superset as a front-end.
 
-Basic SQLAlchemy driver for [DuckDB](https://duckdb.org/)
+Note: this repo contains pre-release nightly Apache Arrow Flight SQL drivers which are subject to change.  It also uses a git sub-module pointing to Apache Superset as it was on 07-Feb-2023. 
 
-<!--ts-->
-* [duckdb_engine](#duckdb_engine)
-   * [Installation](#installation)
-   * [Usage](#usage)
-   * [Configuration](#configuration)
-   * [How to register a pandas DataFrame](#how-to-register-a-pandas-dataframe)
-   * [Things to keep in mind](#things-to-keep-in-mind)
-      * [Auto-incrementing ID columns](#auto-incrementing-id-columns)
-      * [Pandas read_sql() chunksize](#pandas-read_sql-chunksize)
-      * [Unsigned integer support](#unsigned-integer-support)
-   * [Preloading extensions (experimental)](#preloading-extensions-experimental)
-   * [The name](#the-name)
-<!--te-->
+## Option 1 - Running the published Docker image
+The easiest way to run this solution is to use the published Docker image - along with a running Flight SQL Server container.
 
-## Installation
-```sh
-$ pip install duckdb-engine
+### Step 1 - Run an Arrow Flight SQL Docker container (see repo: https://github.com/voltrondata/flight-sql-server-example for more details)
+```bash
+docker run --name flight-sql \
+           --detach \
+           --rm \
+           --tty \
+           --init \
+           --publish 31337:31337 \
+           --env FLIGHT_PASSWORD="flight_password" \
+           --pull missing \
+           voltrondata/flight-sql:latest
+
 ```
 
-DuckDB Engine also has a conda feedstock available, the instructions for the use of which are available in it's [repository](https://github.com/conda-forge/duckdb-engine-feedstock).
-
-## Usage
-
-Once you've installed this package, you should be able to just use it, as SQLAlchemy does a python path search
-
-```python
-from sqlalchemy import Column, Integer, Sequence, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm.session import Session
-
-Base = declarative_base()
-
-
-class FakeModel(Base):  # type: ignore
-    __tablename__ = "fake"
-
-    id = Column(Integer, Sequence("fakemodel_id_sequence"), primary_key=True)
-    name = Column(String)
-
-
-eng = create_engine("duckdb:///:memory:")
-Base.metadata.create_all(eng)
-session = Session(bind=eng)
-
-session.add(FakeModel(name="Frank"))
-session.commit()
-
-frank = session.query(FakeModel).one()
-
-assert frank.name == "Frank"
-```
-
-## Usage in IPython/Jupyter
-
-With IPython-SQL and DuckDB-Engine you can query DuckDB natively in your notebook!
-Alex Monahan has a great demo of this on [his blog](https://alex-monahan.github.io/2021/08/22/Python_and_SQL_Better_Together.html#an-example-workflow-with-duckdb)
-
-## Configuration
-
-You can configure DuckDB by passing `connect_args` to the create_engine function
-```python
-create_engine(
-    'duckdb:///:memory:',
-    connect_args={
-        'read_only': True,
-        'config': {
-            'memory_limit': '500mb'
-        }
-    }
-)
-```
-
-The supported configuration parameters are listed in the [DuckDB docs](https://duckdb.org/docs/sql/configuration)
-
-## How to register a pandas DataFrame
-
-```python
-eng = create_engine("duckdb:///:memory:")
-eng.execute("register", ("dataframe_name", pd.DataFrame(...)))
-
-eng.execute("select * from dataframe_name")
-```
-
-## Things to keep in mind
-Duckdb's SQL parser is based on the PostgreSQL parser, but not all features in PostgreSQL are supported in duckdb. Because the `duckdb_engine` dialect is derived from the `postgresql` dialect, `SQLAlchemy` may try to use PostgreSQL-only features. Below are some caveats to look out for.
-
-### Auto-incrementing ID columns
-When defining an Integer column as a primary key, `SQLAlchemy` uses the `SERIAL` datatype for PostgreSQL. Duckdb does not yet support this datatype because it's a non-standard PostgreSQL legacy type, so a workaround is to use the `SQLAlchemy.Sequence()` object to auto-increment the key. For more information on sequences, you can find the [`SQLAlchemy Sequence` documentation here](https://docs.sqlalchemy.org/en/14/core/defaults.html#associating-a-sequence-as-the-server-side-default).
-
-The following example demonstrates how to create an auto-incrementing ID column for a simple table:
-
-```python
->>> import sqlalchemy
->>> engine = sqlalchemy.create_engine('duckdb:////path/to/duck.db')
->>> metadata = sqlalchemy.MetaData(engine)
->>> user_id_seq = sqlalchemy.Sequence('user_id_seq')
->>> users_table = sqlalchemy.Table(
-...     'users',
-...     metadata,
-...     sqlalchemy.Column(
-...         'id',
-...         sqlalchemy.Integer,
-...         user_id_seq,
-...         server_default=user_id_seq.next_value(),
-...         primary_key=True,
-...     ),
-... )
->>> metadata.create_all(bind=engine)
-```
-
-### Pandas `read_sql()` chunksize
-
-**NOTE**: this is no longer an issue in versions `>=0.5.0` of `duckdb`
-
-The `pandas.read_sql()` method can read tables from `duckdb_engine` into DataFrames, but the `sqlalchemy.engine.result.ResultProxy` trips up when `fetchmany()` is called. Therefore, for now `chunksize=None` (default) is necessary when reading duckdb tables into DataFrames. For example:
-
-```python
->>> import pandas as pd
->>> import sqlalchemy
->>> engine = sqlalchemy.create_engine('duckdb:////path/to/duck.db')
->>> df = pd.read_sql('users', engine)                ### Works as expected
->>> df = pd.read_sql('users', engine, chunksize=25)  ### Throws an exception
-```
-
-### Unsigned integer support
-
-Unsigned integers are supported by DuckDB, and are available in [`duckdb_engine.datatypes`](adbc_flight_sql_driver/datatypes.py).
-
-## Preloading extensions (experimental)
-
-Until the DuckDB python client allows you to natively preload extensions, I've added experimental support via a `connect_args` parameter
-
-```python
-from sqlalchemy import create_engine
-
-create_engine(
-    'duckdb:///:memory:',
-    connect_args={
-        'preload_extensions': ['https'],
-        'config': {
-            's3_region': 'ap-southeast-1'
-        }
-    }
-)
-```
-
-## The name
-
-Yes, I'm aware this package should be named `duckdb-driver` or something, I wasn't thinking when I named it and it's too hard to change the name now
-
-
-docker run --name larry \
-           --interactive \
+### Step 2 - Run the published Superset image which has the ADBC driver setup already:
+```bash
+docker run --name superset-sqlalchemy-adbc-flight-sql \
+           --detach \
            --rm \
            --tty \
            --init \
            --publish 8088:8088 \
            --env SUPERSET_ADMIN_PASSWORD="admin" \
            --pull missing \
-           --entrypoint /bin/bash \
-           joe
+           prmoorevoltron/superset-sqlalchemy-adbc-flight-sql:latest
+```
+
+### Step 3 - Wait about 1 minute for the Superset server to initialize - then open a browser and go to:   
+http://localhost:8088   
+
+Connect with username: "admin" and password: "admin" (or whatever you set env var: "SUPERSET_ADMIN_PASSWORD" to in the command above)
+
+## Option 2 - Building a Docker container from this repo on your computer
+
+### Step 1 - Clone this repo:
+```bash
+git clone https://github.com/voltrondata/superset-sqlalchemy-adbc-flight-sql-poc
+
+cd superset-sqlalchemy-adbc-flight-sql-poc
+
+# Update sub-modules (pulls the Superset source code)
+git submodule update --init
+```
+
+### Step 2 - Build the Docker container
+```bash
+docker build . --tag=local-superset
+```
+
+### Step 3 - Run an Arrow Flight SQL Docker container (see repo: https://github.com/voltrondata/flight-sql-server-example for more details)
+```bash
+docker run --name flight-sql \
+           --detach \
+           --rm \
+           --tty \
+           --init \
+           --publish 31337:31337 \
+           --env FLIGHT_PASSWORD="flight_password" \
+           --pull missing \
+           voltrondata/flight-sql:latest
+
+```
+
+### Step 2 - Run the Superset docker image you just built:
+```bash
+docker run --name superset-sqlalchemy-adbc-flight-sql \
+           --detach \
+           --rm \
+           --tty \
+           --init \
+           --publish 8088:8088 \
+           --env SUPERSET_ADMIN_PASSWORD="admin" \
+           --pull missing \
+           local-superset
+```
+
+## Browser steps once you have Superset up and running
+
+### 1. Create a Database connection
+
+#### a. Click "Settings" in the upper-right, then under "Data" - click: "Database Connections"
+
+#### b. On the next screen - click: "+ DATABASE" - also in the upper-right, just under: "Settings
+
+#### c. When the "Connect a Database" window opens up - click the "SUPPORTED DATABASES" drop-down and choose: "Other"
+
+#### d. Type "Flight SQL" for "DISPLAY NAME"
+
+#### e. Enter the SQLALCHRMY URI value of:
+```
+adbc_flight_sql://flight_username:flight_password@host.docker.internal:31337?disableCertificateVerification=True&useEncryption=True
+```
+
+#### f. Click the "TEST CONNECTION" button - you should see a message on the lower-right say: "Connection looks good!"
+
+#### g. Click "CONNECT" to save the Database connection
+
+### 2. Use the new "Flight SQL" connection you just created in the SQL Lab
+
+#### a. Click "SQL" in the Superset main menu (top-left of screen), then choose: "SQL Lab"
+
+#### b. Type a query in the SQL window on the right - something like:
+```SELECT * FROM customer```
+
+#### c. Click the blue: "RUN SELECTION" button.  You should see data appear below the query.
