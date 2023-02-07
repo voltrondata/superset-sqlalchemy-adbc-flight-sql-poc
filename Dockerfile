@@ -62,14 +62,12 @@ COPY --chown=app_user:app_user . ./adbc
 
 WORKDIR ${APP_DIR}/adbc
 
-# Install Poetry package manager
-RUN pip install poetry
-
-# Install the local ADBC SQLAlchemy driver project
-RUN poetry install
-
 # Install Apache Superset (using source)
 RUN pip install --editable ./apache-superset
+
+# Install Poetry package manager and then install the local ADBC SQLAlchemy driver project
+RUN pip install poetry && \
+    poetry install
 
 ENV FLASK_APP="superset.app:create_app()"
 

@@ -20,7 +20,7 @@ python = ">=3.9"
 sqlalchemy = "^1.4.46"
 numpy = "^1.23.5"
 psycopg2 = "^2.9.5"
-pyarrow = "^10.0.1"
+pyarrow = "^11.0.0"
 adbc_driver_manager = { version = "*", source = "arrow-adbc-nightlies" }
 adbc_driver_flightsql = { version = "*", source = "arrow-adbc-nightlies" }
 
