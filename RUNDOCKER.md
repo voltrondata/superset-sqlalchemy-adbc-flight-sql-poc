@@ -16,16 +16,3 @@ docker run --name superset-sqlalchemy-adbc-flight-sql \
            --entrypoint /bin/bash \
            prmoorevoltron/superset-sqlalchemy-adbc-flight-sql:latest
 ````
-
-```bash
-docker run --name larry \
-           --interactive \
-           --rm \
-           --tty \
-           --init \
-           --publish 8088:8088 \
-           --env SUPERSET_ADMIN_PASSWORD="admin" \
-           --pull missing \
-           --entrypoint /bin/bash \
-           joe
-````
