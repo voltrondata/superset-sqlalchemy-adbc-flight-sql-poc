@@ -32,7 +32,7 @@ docker run --name superset-sqlalchemy-adbc-flight-sql \
            --publish 8088:8088 \
            --env SUPERSET_ADMIN_PASSWORD="admin" \
            --pull missing \
-           voltrondata/superset-sqlalchemy-adbc-flight-sql:latest
+           prmoorevoltron/superset-sqlalchemy-adbc-flight-sql:latest
 ```
 
 ### Step 3 - Wait about 1 minute for the Superset server to initialize - then open a browser and go to:   
@@ -44,12 +44,9 @@ Connect with username: "admin" and password: "admin" (or whatever you set env va
 
 ### Step 1 - Clone this repo:
 ```bash
-git clone https://github.com/voltrondata/superset-sqlalchemy-adbc-flight-sql-poc
+git clone https://github.com/voltrondata/superset-sqlalchemy-adbc-flight-sql-poc --recurse-submodules
 
 cd superset-sqlalchemy-adbc-flight-sql-poc
-
-# Update sub-modules (pulls the Superset source code)
-git submodule update --init
 ```
 
 ### Step 2 - Build the Docker container
