@@ -121,6 +121,6 @@ c. Click the blue: "RUN" button.  You should see data appear below the query.  Y
 Just stop the docker containers with these commands:
 
 ```bash
-docker kill superset-sqlalchemy-adbc-flight-sql
-docker kill flight-sql
+docker stop superset-sqlalchemy-adbc-flight-sql
+docker stop flight-sql
 ```
