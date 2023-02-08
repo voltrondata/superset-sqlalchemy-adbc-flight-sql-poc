@@ -114,7 +114,7 @@ a. Click "SQL" in the Superset main menu (top-left of screen), then choose: "SQL
 b. Type a query in the SQL window on the right - something like:   
 ```SELECT * FROM customer;```
 
-c. Click the blue: "RUN SELECTION" button.  You should see data appear below the query.  Your window should look like this:   
+c. Click the blue: "RUN" button.  You should see data appear below the query.  Your window should look like this:   
 ![SQL Lab query results screenshot](images/superset_sql_lab_query_results_screenshot.png?raw=true "SQL Lab query results")
 
 ## Tear Down
