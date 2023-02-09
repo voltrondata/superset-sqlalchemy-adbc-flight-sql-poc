@@ -1,0 +1,63 @@
+name: Python application
+
+on: [pull_request, workflow_dispatch]
+permissions:
+  checks: write
+
+jobs:
+  build_backend:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python: [3.7, 3.8, 3.9, "3.10"]
+        bleeding_edge: [false]
+        include:
+        - python: 3.9
+          bleeding_edge: true
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Remove cached duckdb extensions
+        run: rm -rf ~/.duckdb
+      - name: Install poetry
+        run: python -m pip install poetry pip -U
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python }}
+          cache: poetry
+      - name: Install tox
+        run: |
+          python -m pip install --upgrade tox~=3.27.1
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test with tox
+        run: tox -e duckdb_master,ibis
+        if: matrix.bleeding_edge
+      - name: Test with tox
+        run: tox
+        if: "!matrix.bleeding_edge"
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          junit_files: results.xml
+          comment_mode: off
+          check_name:  "Test Results - ${{ join(matrix.*, ', ') }}"
+      - uses: codecov/codecov-action@v3
+        env:
+          PYTHON: ${{matrix.python}}
+          BLEEDING_EDGE: ${{matrix.bleeding_edge}}
+        with:
+          files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: PYTHON,BLEEDING_EDGE  # set from matrix
+          fail_ci_if_error: true
+          verbose: true

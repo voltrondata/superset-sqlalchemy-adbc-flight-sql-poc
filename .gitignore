@@ -1,0 +1,13 @@
+.mypy_cache
+.pytest_cache
+*.log
+dist/
+*.egg-info
+__pycache__/
+.tox/
+htmlcov/
+.coverage
+coverage.xml
+venv
+arrow
+arrow_dist
