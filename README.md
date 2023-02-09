@@ -1,5 +1,9 @@
 # Apache Superset using the new Python ADBC driver for Flight SQL 
 
+[<img src="https://img.shields.io/badge/dockerhub-image-green.svg?logo=Docker">](https://hub.docker.com/r/voltrondata/superset-sqlalchemy-adbc-flight-sql)
+[<img src="https://img.shields.io/badge/GitHub-voltrondata%2Fsuperset--sqlalchemy--adbc--flight--sql--poc-blue.svg?logo=Github">](https://github.com/voltrondata/superset-sqlalchemy-adbc-flight-sql-poc)
+
+
 This repo demonstrates the use of the new Python ADBC Flight SQL driver with SQLAlchemy and Apache Superset as a front-end.
 
 Note: this repo contains pre-release nightly Apache Arrow Flight SQL drivers which are subject to change.  It also uses a git sub-module pointing to Apache Superset as it was on 07-Feb-2023.
