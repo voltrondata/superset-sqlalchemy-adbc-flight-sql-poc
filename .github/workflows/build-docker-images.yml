@@ -7,7 +7,7 @@ on:
       - 'main'
 
 env:
-  DOCKER_IMAGE_NAME: prmoorevoltron/superset-sqlalchemy-adbc-flight-sql
+  DOCKER_IMAGE_NAME: voltrondata/superset-sqlalchemy-adbc-flight-sql
 
 jobs:
   docker:

@@ -32,7 +32,7 @@ docker run --name superset-sqlalchemy-adbc-flight-sql \
            --publish 8088:8088 \
            --env SUPERSET_ADMIN_PASSWORD="admin" \
            --pull missing \
-           prmoorevoltron/superset-sqlalchemy-adbc-flight-sql:latest
+           voltrondata/superset-sqlalchemy-adbc-flight-sql:latest
 ```
 
 ### Step 3 - Wait about 1 minute for the Superset server to initialize - then open a browser and go to:   
