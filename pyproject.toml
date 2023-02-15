@@ -11,18 +11,14 @@ repository = "https://github.com/prmoore77/sqlalchemy_flight_sql_driver"
 "Bug Tracker" = "https://github.com/prmoore77/sqlalchemy_flight_sql_driver/issues"
 "Changelog" = "https://github.com/prmoore77/sqlalchemy_flight_sql_driver/releases"
 
-[[tool.poetry.source]]
-name = "arrow-adbc-nightlies"
-url = "https://repo.fury.io/arrow-adbc-nightlies/"
-
 [tool.poetry.dependencies]
 python = ">=3.9"
 sqlalchemy = "^1.4.46"
 numpy = "^1.23.5"
 psycopg2 = "^2.9.5"
 pyarrow = "^11.0.0"
-adbc_driver_manager = { version = "*", source = "arrow-adbc-nightlies" }
-adbc_driver_flightsql = { version = "*", source = "arrow-adbc-nightlies" }
+adbc_driver_manager = "^0.2.0"
+adbc_driver_flightsql = "0.2.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"
