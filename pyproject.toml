@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "adbc_flight_sql_driver"
-version = "0.0.1"
+version = "0.0.2"
 description = "SQLAlchemy driver for ADBC with an Apache Arrow Flight SQL backend"
 authors = ["Philip Moore <prmoore77@hotmail.com>"]
 license = "MIT"
@@ -17,8 +17,8 @@ sqlalchemy = "^1.4.46"
 numpy = "^1.23.5"
 psycopg2 = "^2.9.5"
 pyarrow = "^11.0.0"
-adbc_driver_manager = "^0.2.0"
-adbc_driver_flightsql = "^0.2.0"
+adbc-driver-manager = "^0.3.0"
+adbc-driver-flightsql = "^0.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"

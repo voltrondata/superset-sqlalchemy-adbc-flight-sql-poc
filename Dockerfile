@@ -67,16 +67,16 @@ RUN cp ./superset_config_files/setup.py ./apache-superset && \
     pip install --editable ./apache-superset
 
 # Install Poetry package manager and then install the local ADBC SQLAlchemy driver project
+ENV POETRY_VIRTUALENVS_CREATE="false"
 RUN pip install poetry && \
     poetry install
 
 ENV FLASK_APP="superset.app:create_app()"
 
+# Build javascript assets
 WORKDIR ${APP_DIR}/adbc/apache-superset/superset-frontend
-RUN npm install -f --no-optional webpack webpack-cli && \
-    npm install -f --no-optional && \
-    echo "Building frontend" && \
-    npm run build-dev
+RUN npm ci && \
+    npm run build
 
 # Initialize superset
 WORKDIR ${APP_DIR}/adbc

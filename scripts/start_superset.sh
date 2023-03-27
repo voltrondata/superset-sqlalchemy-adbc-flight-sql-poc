@@ -33,7 +33,7 @@ Init Step ${1} [${2}] -- ${3}
 EOF
 }
 
-SUPERSET_INIT_COMPLETE_FILE="~/.superset/superset_init_complete.txt"
+SUPERSET_INIT_COMPLETE_FILE=".superset/superset_init_complete.txt"
 
 # Determine if we should apply the Superset init steps
 if [ ! -f ${SUPERSET_INIT_COMPLETE_FILE} ]
@@ -44,6 +44,9 @@ else
   SUPERSET_INIT=0
   echo "NOTE: We will skip Superset init steps b/c the ${SUPERSET_INIT_COMPLETE_FILE} file exists"
 fi
+
+# Create a superset config file with a secure SECRET_KEY if it isn't present
+python -c "import superset_config" || echo "SECRET_KEY='$(openssl rand -base64 42)'" > superset_config.py
 
 # Start superset
 echo_step "1" "Starting" "Start Superset"
@@ -91,7 +94,7 @@ then
   echo_step "4" "Complete" "Setting up roles and perms"
 
   # Create the SUPERSET_INIT_COMPLETE_FILE file so container restarts do not run all of the init steps...
-  mkdir --parents $(dirname ${SUPERSET_INIT_COMPLETE_FILE})
+  mkdir -p $(dirname ${SUPERSET_INIT_COMPLETE_FILE})
   touch ${SUPERSET_INIT_COMPLETE_FILE}
 
 fi
