@@ -33,7 +33,7 @@ Init Step ${1} [${2}] -- ${3}
 EOF
 }
 
-SUPERSET_INIT_COMPLETE_FILE="~/.superset/superset_init_complete.txt"
+SUPERSET_INIT_COMPLETE_FILE=".superset/superset_init_complete.txt"
 
 # Determine if we should apply the Superset init steps
 if [ ! -f ${SUPERSET_INIT_COMPLETE_FILE} ]
@@ -46,11 +46,7 @@ else
 fi
 
 # Create a superset config file with a secure SECRET_KEY if it isn't present
-if [ ! -f superset_config.py ]
-then
-  echo "Creating superset_config.py file b/c it is not present..."
-  echo "SECRET_KEY='$(openssl rand -base64 42)'" > superset_config.py
-fi
+python -c "import superset_config" || echo "SECRET_KEY='$(openssl rand -base64 42)'" > superset_config.py
 
 # Start superset
 echo_step "1" "Starting" "Start Superset"
