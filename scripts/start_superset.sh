@@ -45,6 +45,13 @@ else
   echo "NOTE: We will skip Superset init steps b/c the ${SUPERSET_INIT_COMPLETE_FILE} file exists"
 fi
 
+# Create a superset config file with a secure SECRET_KEY if it isn't present
+if [ ! -f superset_config.py ]
+then
+  echo "Creating superset_config.py file b/c it is not present..."
+  echo "SECRET_KEY='$(openssl rand -base64 42)'" > superset_config.py
+fi
+
 # Start superset
 echo_step "1" "Starting" "Start Superset"
 

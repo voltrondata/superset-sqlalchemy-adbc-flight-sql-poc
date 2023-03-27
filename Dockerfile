@@ -66,6 +66,7 @@ WORKDIR ${APP_DIR}/adbc
 RUN pip install --editable ./apache-superset
 
 # Install Poetry package manager and then install the local ADBC SQLAlchemy driver project
+ENV POETRY_VIRTUALENVS_CREATE="false"
 RUN pip install poetry && \
     poetry install
 

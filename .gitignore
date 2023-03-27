@@ -13,3 +13,4 @@ arrow
 arrow_dist
 
 .idea/
+superset_config.py

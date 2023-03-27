@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "adbc_flight_sql_driver"
-version = "0.0.1"
+version = "0.0.2"
 description = "SQLAlchemy driver for ADBC with an Apache Arrow Flight SQL backend"
 authors = ["Philip Moore <prmoore77@hotmail.com>"]
 license = "MIT"
