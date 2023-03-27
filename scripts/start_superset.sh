@@ -91,7 +91,7 @@ then
   echo_step "4" "Complete" "Setting up roles and perms"
 
   # Create the SUPERSET_INIT_COMPLETE_FILE file so container restarts do not run all of the init steps...
-  mkdir --parents $(dirname ${SUPERSET_INIT_COMPLETE_FILE})
+  mkdir -p $(dirname ${SUPERSET_INIT_COMPLETE_FILE})
   touch ${SUPERSET_INIT_COMPLETE_FILE}
 
 fi
