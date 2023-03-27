@@ -4,3 +4,5 @@ venv
 docker_build_and_push.sh
 Dockerfile
 images/
+superset_config.py
+.superset/
