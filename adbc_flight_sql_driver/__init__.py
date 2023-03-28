@@ -201,6 +201,32 @@ class Dialect(PGDialect_psycopg2):
         with connection.cursor() as cur:
             cur.execute("commit")
 
+    def get_schema_names(
+            self,
+            connection: Any,
+            **kw: Any,
+    ) -> Any:
+        s = "SELECT schema_name FROM information_schema.schemata WHERE catalog_name=current_database() ORDER BY 1 ASC"
+        with connection.connection.cursor() as cur:
+            cur.execute(operation=s)
+            rs = cur.fetchall()
+
+        return [row[0] for row in rs]
+
+    def get_table_names(
+            self,
+            connection: Any,
+            schema: Optional[Any] = None,
+            include: Optional[Any] = None,
+            **kw: Any,
+    ) -> Any:
+        s = "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema=? ORDER BY 1 ASC"
+        with connection.connection.cursor() as cur:
+            cur.execute(operation=s, parameters=[schema if schema is not None else "main"])
+            rs = cur.fetchall()
+
+        return [row[0] for row in rs]
+
     def get_view_names(
             self,
             connection: Any,
@@ -208,7 +234,7 @@ class Dialect(PGDialect_psycopg2):
             include: Optional[Any] = None,
             **kw: Any,
     ) -> Any:
-        s = "SELECT table_name FROM information_schema.tables WHERE table_type='VIEW' AND table_schema=?"
+        s = "SELECT table_name FROM information_schema.tables WHERE table_type='VIEW' AND table_schema=? ORDER BY 1"
         with connection.connection.cursor() as cur:
             cur.execute(operation=s, parameters=[schema if schema is not None else "main"])
             rs = cur.fetchall()
