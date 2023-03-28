@@ -100,7 +100,7 @@ setup(
         "isodate",
         "markdown>=3.0",
         "msgpack>=1.0.0, <1.1",
-        "numpy==1.23.5",
+        "numpy==1.24.2, <2",
         "pandas>=1.5.3, <1.6",
         "parsedatetime",
         "pgsanity",

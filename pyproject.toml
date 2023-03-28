@@ -14,7 +14,7 @@ repository = "https://github.com/prmoore77/sqlalchemy_flight_sql_driver"
 [tool.poetry.dependencies]
 python = ">=3.9"
 sqlalchemy = "^1.4.46"
-numpy = "^1.23.5"
+numpy = "^1.24.2"
 psycopg2 = "^2.9.5"
 pyarrow = "^11.0.0"
 adbc-driver-manager = "^0.3.0"
