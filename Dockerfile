@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.11.3
 
 # Switching to root to install the required packages
 USER root
@@ -64,6 +64,7 @@ WORKDIR ${APP_DIR}/adbc
 
 # Install Apache Superset (using source)
 RUN cp ./superset_config_files/setup.py ./apache-superset && \
+    cp ./superset_config_files/sql_lab.py ./apache-superset/superset/sql_lab.py && \
     pip install --editable ./apache-superset
 
 # Install Poetry package manager and then install the local ADBC SQLAlchemy driver project

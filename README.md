@@ -6,7 +6,7 @@
 
 This repo demonstrates the use of the new Python ADBC Flight SQL driver with SQLAlchemy and Apache Superset as a front-end.
 
-Note: this repo uses a git sub-module pointing to Apache Superset as it was on 07-Feb-2023.
+Note: this repo uses a git sub-module currently pointed to Apache Superset version [2.1.0](https://github.com/apache/superset/releases/tag/2.1.0)
 
 The SQLAlchemy ADBC Flight SQL driver used here is designed for a Flight SQL server running a PostgreSQL-type dialect (such as PostgreSQL or DuckDB) - meaning it has the Postgres-style information schema tables available.
 

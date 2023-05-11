@@ -5,20 +5,21 @@ description = "SQLAlchemy driver for ADBC with an Apache Arrow Flight SQL backen
 authors = ["Philip Moore <prmoore77@hotmail.com>"]
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/prmoore77/sqlalchemy_flight_sql_driver"
+repository = "https://github.com/voltrondata/superset-sqlalchemy-adbc-flight-sql-poc"
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/prmoore77/sqlalchemy_flight_sql_driver/issues"
-"Changelog" = "https://github.com/prmoore77/sqlalchemy_flight_sql_driver/releases"
+"Bug Tracker" = "https://github.com/voltrondata/superset-sqlalchemy-adbc-flight-sql-poc/issues"
+"Changelog" = "https://github.com/voltrondata/superset-sqlalchemy-adbc-flight-sql-poc/releases"
 
 [tool.poetry.dependencies]
 python = ">=3.9"
 sqlalchemy = "^1.4.46"
 numpy = "^1.24.2"
 psycopg2 = "^2.9.5"
-pyarrow = "^11.0.0"
+pyarrow = "^12.0.0"
 adbc-driver-manager = "^0.3.0"
 adbc-driver-flightsql = "^0.3.0"
+sqlparse = "0.4.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.0"

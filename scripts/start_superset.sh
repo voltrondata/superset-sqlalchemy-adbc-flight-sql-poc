@@ -97,6 +97,8 @@ then
   mkdir -p $(dirname ${SUPERSET_INIT_COMPLETE_FILE})
   touch ${SUPERSET_INIT_COMPLETE_FILE}
 
+  echo "All init steps complete - Superset started and ready."
+
 fi
 
 # Wait forever on superset server background process
