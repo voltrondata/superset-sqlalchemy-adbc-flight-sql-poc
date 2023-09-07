@@ -1,4 +1,4 @@
-FROM python:3.11.3
+FROM python:3.11.5
 
 # Switching to root to install the required packages
 USER root
